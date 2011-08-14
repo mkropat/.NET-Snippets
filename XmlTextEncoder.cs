@@ -48,12 +48,13 @@ namespace Snippets {
                 if (Entities.ContainsKey(c)) {
                     // Encode all entities defined in the XML spec [2].
                     foreach (var i in Entities[c]) _buf.Enqueue(i);
-                } else if (!(0x1 <= c && c <= 0x8) &&
+                } else if (!(0x0 <= c && c <= 0x8) &&
                            !new[] { 0xB, 0xC }.Contains(c) &&
                            !(0xE <= c && c <= 0x1F) &&
                            !(0x7F <= c && c <= 0x84) &&
                            !(0x86 <= c && c <= 0x9F) &&
-                           !(0xD7FF < c)) {
+                           !(0xD800 <= c && c <= 0xDFFF) &&
+                           !new[] { 0xFFFE, 0xFFFF }.Contains(c)) {
                     // Allow if the Unicode codepoint is legal in XML [3].
                     _buf.Enqueue(c);
                 } else if (char.IsHighSurrogate(c) &&
@@ -114,7 +115,7 @@ namespace Snippets.Test {
             var s = "foo";
             Assert.AreEqual(
                 s,
-                XmlTextEncoder.Encode(String.Format("\u0001\u000b\u000e{0}\u007f\u0086", s)));
+                XmlTextEncoder.Encode(String.Format("\u0000\u0001\u000b{0}\u000e\u007f\u0086\uFFFE", s)));
         }
 
         [Test]
